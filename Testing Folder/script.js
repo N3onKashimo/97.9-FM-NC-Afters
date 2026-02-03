@@ -108,16 +108,10 @@ function initAudioAnalyser() {
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 64;
 
-  // 🔑 Gain node for visual normalization
-  const visualGain = audioContext.createGain();
-  visualGain.gain.value = 2.2; // iTunes-style boost
-
   const bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
 
-  // Routing
-  source.connect(visualGain);
-  visualGain.connect(analyser);
+  source.connect(analyser);
 
   // Real audio path (untouched)
   source.connect(audioContext.destination);
@@ -391,15 +385,16 @@ function startWaveform() {
 
     // perceptual scaling based on volume slider (0–1)
     const vol = Math.max(0.15, audioPlayer.volume); // never fully dead
-    const visualScale = 0.6 + vol * 0.9; // iTunes-style response curve
-
+    // iTunes-style perceptual scaling
+    const visualScale = 0.55 + Math.pow(vol, 0.6) * 0.6;
+    
     bars.forEach((bar, i) => {
       // bias toward bass (lower bins move more)
       const binIndex = i * 2 + 2;
       const raw = dataArray[binIndex] || 0;
 
       // logarithmic compression (prevents “stuck at loud” look)
-      const compressed = Math.log10(1 + raw) * 45;
+      const compressed = Math.log10(1 + raw) * 32;
 
       // apply volume scaling
       const target = compressed * visualScale;
@@ -407,7 +402,7 @@ function startWaveform() {
       // temporal smoothing (iTunes-like motion)
       smoothed[i] = smoothed[i] * 0.75 + target * 0.25;
 
-      const height = Math.max(4, Math.min(24, smoothed[i]));
+      const height = Math.max(4, Math.min(20, smoothed[i]));
       bar.style.height = `${height}px`;
     });
   }
