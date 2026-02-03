@@ -106,7 +106,7 @@ function initAudioAnalyser() {
   const source = audioContext.createMediaElementSource(audioPlayer);
 
   analyser = audioContext.createAnalyser();
-  analyser.fftSize = 64;
+  analyser.fftSize = 128;
 
   const bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
@@ -378,6 +378,12 @@ function startWaveform() {
   // persistent smoothing memory
   let smoothed = new Array(bars.length).fill(0);
 
+  // previous frame memory (for reactivity)
+  let prevSmoothed = new Array(bars.length).fill(0);
+
+  // persistent bass memory (for rhythm detection)
+  let lastBass = 0;
+
   function draw() {
     animationId = requestAnimationFrame(draw);
 
@@ -387,11 +393,31 @@ function startWaveform() {
     const vol = Math.max(0.15, audioPlayer.volume); // never fully dead
     // iTunes-style perceptual scaling
     const visualScale = 0.55 + Math.pow(vol, 0.6) * 0.6;
-    
+
     bars.forEach((bar, i) => {
       // bias toward bass (lower bins move more)
       const binIndex = i * 2 + 2;
-      const raw = dataArray[binIndex] || 0;
+
+      // --- Spotify-style bass weighting ---
+      const bass = (dataArray[1] + dataArray[2] + dataArray[3]) / 3;
+      const mid = dataArray[binIndex] || 0;
+
+      // Winamp-style expressive bias (center bars move more)
+      const positionBias = 1 - Math.abs(i - bars.length / 2) / (bars.length / 2);
+      const expressiveBoost = 0.9 + positionBias * 0.2;
+
+      // transient emphasis (kick detection)
+      const bassDelta = Math.max(0, bass - lastBass);
+      lastBass = bass;
+
+      // boost only on sudden hits
+      const transientBoost =
+        bassDelta > 6
+          ? 1 + Math.min(bassDelta / 32, 0.8)
+          : 1;
+
+      const raw = (mid * 0.6 + bass * 0.4) * expressiveBoost * transientBoost;
+
 
       // logarithmic compression (prevents “stuck at loud” look)
       const compressed = Math.log10(1 + raw) * 32;
@@ -399,11 +425,37 @@ function startWaveform() {
       // apply volume scaling
       const target = compressed * visualScale;
 
-      // temporal smoothing (iTunes-like motion)
-      smoothed[i] = smoothed[i] * 0.75 + target * 0.25;
+      // --- AGC-lite normalization ---
+      const peakError = TARGET_PEAK / Math.max(target, 0.001);
 
-      const height = Math.max(4, Math.min(20, smoothed[i]));
+      // adapt gain slowly (prevents snapping)
+      if (peakError < visualGain) {
+        visualGain += (peakError - visualGain) * GAIN_ATTACK;
+      } else {
+        visualGain += (peakError - visualGain) * GAIN_RELEASE;
+      }
+
+      // apply adaptive gain
+      const normalized = target * visualGain;
+
+      // temporal smoothing (iTunes-like motion)
+      smoothed[i] = smoothed[i] * 0.75 + normalized * 0.25;
+
+      // frame-to-frame change (event reactivity)
+      const delta = Math.abs(smoothed[i] - prevSmoothed[i]);
+      prevSmoothed[i] = smoothed[i];
+
+      // ONLY boost when there is real change
+      const reactive = smoothed[i] + Math.min(delta * 2.4, 8);
+
+      // nonlinear height curve (adds drama without peaking)
+      const curved = Math.pow(reactive / 20, 0.75) * 20;
+      const height = Math.max(4, Math.min(20, curved));
+
+      // subtle phase drift for organic motion
+      const phase = Math.sin(performance.now() / 260 + i * 0.8) * 1.4;
       bar.style.height = `${height}px`;
+
     });
   }
 
@@ -417,6 +469,16 @@ function stopWaveform() {
     bar.style.height = '4px';
   });
 }
+
+// ----------------------------------------------
+// VISUAL GAIN CONTROL (AGC-lite)
+// ----------------------------------------------
+
+// slowly adapting visual gain so waveform never pegs
+let visualGain = 1.0;
+const GAIN_ATTACK = 0.015;   // reacts to loud audio
+const GAIN_RELEASE = 0.004;  // relaxes on quiet audio
+const TARGET_PEAK = 14;      // desired visual height in px
 
 
 // ----------------------------------------------
