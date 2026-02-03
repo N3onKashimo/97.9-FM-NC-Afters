@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>97.9 FM NC Afters</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="678c93d20b79b9418f6d2bb126615e53.jpg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Dynamic blurred artwork background -->
+  <div class="bg-art" id="bgArt"></div>
+
+  <div class="desktop-bg">
+    <div class="app-window">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-tabs">
+          <button class="tab active" id="dateTab">Loading...</button>
+          <button class="tab" id="timeTab">Loading...</button>
+          <button class="tab" id="themeToggle" aria-label="Toggle theme">☀️</button>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <div class="window-buttons">
+          <span class="circle red"></span>
+          <span class="circle yellow"></span>
+          <span class="circle green"></span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- Top Row -->
+        <div class="row top-row">
+          <div class="card profile-card glass">
+            <div class="profile-left">
+              <div class="avatar-frame">
+                <img src="pfp.png" alt="Profile" />
+              </div>
+              <div class="profile-meta">
+                <div class="meta-line strong">user: @pewpers • Online now</div>
+                <div class="meta-line">Status : Radio Hosting</div>
+
+                <!-- PATCH #1 — REMOVED NOTES FROM PROFILE CARD -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card links-card glass">
+            <div class="links-title">Get to know your Host!</div>
+            <div class="links-list">
+              <a href="https://open.spotify.com/user/1254759797?si=ff040dad8c3b46a4" target="_blank">Spotify</a>
+              <a href="https://www.tumblr.com/iliketopewp" target="_blank">Tumblr</a>
+              <a href="https://www.pinterest.com/N3onKashimo/" target="_blank">Pinterest</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Row -->
+        <div class="row mid-row">
+          <div class="card player-card glass">
+            <div class="player-top">
+              <div class="cover-frame">
+                <div class="cover-inner">
+                  <img src="cover.png" alt="Cover" id="coverImage" />
+                  <div class="cover-glow"></div>
+                </div>
+                <div class="cover-caption">
+                  <div class="track-title" id="nowTitle">Loading…</div>
+                  <div class="track-artist" id="nowArtist">—</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="player-controls">
+              <button id="playBtn" class="btn primary">▶ Play</button>
+              <button id="liveBtn" class="btn primary">⏩ Live</button>
+              <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
+            </div>
+
+            <!-- Waveform -->
+            <div class="waveform" id="waveform">
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </div>
+
+            <!-- Multi-station wheel -->
+            <div class="station-table">
+              <div class="station-header">
+                <span class="col-index">#</span>
+                <span class="col-title">Station</span>
+                <span class="col-genre">Genre</span>
+              </div>
+
+              <div class="station-body" id="stationWheel">
+
+                <!-- 1. Top Scrobbles -->
+                <div class="station-row active" data-stream="https://ncafters.live/tops"
+                  data-title="Top Scrobbles Trending" data-genre="Last.fm / Trending" data-mount="/tops"
+                  data-icecast="true">
+                  <span class="col-index">1.</span>
+                  <span class="col-title">Top Scrobbles Trending</span>
+                  <span class="col-genre">Last.fm / Trending</span>
+                </div>
+
+                <!-- 2. Hot Topic -->
+                <div class="station-row" data-stream="https://ncafters.live/hottopic" data-title="Hot Topic"
+                  data-genre="Emo / Pop Punk" data-mount="/hottopic" data-icecast="true">
+                  <span class="col-index">2.</span>
+                  <span class="col-title">Hot Topic</span>
+                  <span class="col-genre">Emo / Pop Punk</span>
+                </div>
+
+                <!-- 3. Miami Vice -->
+                <div class="station-row" data-stream="https://ncafters.live/miamivice" data-title="Miami Vice"
+                  data-genre="Retro / 80s" data-mount="/miamivice" data-icecast="true">
+                  <span class="col-index">3.</span>
+                  <span class="col-title">Miami Vice</span>
+                  <span class="col-genre">Retro / 80s</span>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata & posts -->
+          <div class="card posts-card glass">
+            <div class="post meta-post">
+              <div class="post-title strong">Live Metadata</div>
+              <div class="meta-grid">
+                <div class="meta-label">Mount:</div>
+                <div class="meta-value" id="metaMount">—</div>
+
+                <div class="meta-label">Listeners:</div>
+                <div class="meta-value" id="metaListeners">0</div>
+
+                <div class="meta-label">Peak:</div>
+                <div class="meta-value" id="metaPeak">0</div>
+
+                <div class="meta-label">Bitrate:</div>
+                <div class="meta-value" id="metaBitrate">—</div>
+
+                <div class="meta-label">Uptime:</div>
+                <div class="meta-value" id="metaUptime">—</div>
+              </div>
+            </div>
+
+            <div class="post">
+              <div class="post-title strong">Now Playing</div>
+              <div class="post-body" id="serverStatus">Connecting to Icecast…</div>
+            </div>
+
+            <!-- PATCH #2 — REPLACED NOTES WITH TRACK HISTORY -->
+            <div class="post">
+              <div class="post-title strong">Track History</div>
+              <div class="post-body" id="trackHistoryList">
+                No tracks played yet…
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Activity bar -->
+        <div class="activity-bar glass">
+          <span class="activity-text">Activity: Listening to</span>
+          <span class="activity-track" id="activityTrack">— starting radio…</span>
+          <div class="activity-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="activity-time" id="activityTime">LIVE</span>
+          </div>
+        </div>
+
+        <div class="footer">
+        </div>
+      </div>
+
+      <audio id="audioPlayer"></audio>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
