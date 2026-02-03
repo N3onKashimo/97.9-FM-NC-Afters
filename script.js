@@ -4,7 +4,9 @@
 const ICECAST_URL = 'https://ncafters.live/status-json.xsl';
 
 const audioPlayer = document.getElementById('audioPlayer');
+audioPlayer.crossOrigin = "anonymous";
 const playBtn = document.getElementById('playBtn');
+const volumeSlider = document.getElementById('volumeSlider');
 const stationRows = document.querySelectorAll('.station-row');
 
 const nowTitle = document.getElementById('nowTitle');
@@ -71,10 +73,16 @@ function setPlayingVisual(isPlaying) {
     document.body.classList.add('is-playing');
     waveform.classList.add('active');
     playBtn.textContent = '⏸ Pause';
+
+    initAudioAnalyser();
+    audioContext.resume();
+    startWaveform();
   } else {
     document.body.classList.remove('is-playing');
     waveform.classList.remove('active');
     playBtn.textContent = '▶ Play';
+
+    stopWaveform();
   }
 }
 
@@ -82,6 +90,49 @@ function setActiveRow(row) {
   stationRows.forEach(r => r.classList.remove('active'));
   if (row) row.classList.add('active');
 }
+
+// ----------------------------------------------
+// AUDIO ANALYSER (REAL WAVEFORM)
+// ----------------------------------------------
+let audioContext;
+let analyser;
+let dataArray;
+let animationId;
+
+function initAudioAnalyser() {
+  if (audioContext) return;
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioContext.createMediaElementSource(audioPlayer);
+
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 128;
+
+  const bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+
+  source.connect(analyser);
+
+  // Real audio path (untouched)
+  source.connect(audioContext.destination);
+}
+
+
+// ----------------------------------------------
+// DAY / NIGHT MODE
+// ----------------------------------------------
+const themeToggle = document.getElementById('themeToggle');
+
+themeToggle.addEventListener('click', () => {
+  const root = document.documentElement; // <html>
+  const isDay = root.classList.toggle('day-mode');
+
+  // keep body in sync too (so any body.day-mode rules still work)
+  document.body.classList.toggle('day-mode', isDay);
+
+  // show the opposite icon (what you’ll switch TO)
+  themeToggle.textContent = isDay ? '🌙' : '☀️';
+});
 
 
 // ----------------------------------------------
@@ -131,6 +182,30 @@ playBtn.addEventListener('click', () => {
 
 audioPlayer.addEventListener('play', () => setPlayingVisual(true));
 audioPlayer.addEventListener('pause', () => setPlayingVisual(false));
+
+// ----------------------------------------------
+// JUMP TO LIVE
+// ----------------------------------------------
+const liveBtn = document.getElementById('liveBtn');
+
+liveBtn.addEventListener('click', () => {
+  if (!currentStream) return;
+
+  audioPlayer.pause();
+  audioPlayer.src = currentStream; // force reconnect
+  audioPlayer.play().then(() => setPlayingVisual(true));
+});
+
+
+
+// ----------------------------------------------
+// VOLUME CONTROL
+// ----------------------------------------------
+audioPlayer.volume = 0.8;
+
+volumeSlider.addEventListener('input', () => {
+  audioPlayer.volume = volumeSlider.value;
+});
 
 
 // ----------------------------------------------
@@ -211,7 +286,7 @@ function pushTrackHistory(rawSong) {
 
   // Prevent duplicates caused by switching stations
   if (trackHistories[currentMount][0]?.title === clean) {
-    return; 
+    return;
   }
 
   trackHistories[currentMount].unshift({
@@ -296,6 +371,114 @@ async function fetchIcecast() {
     console.error("Icecast metadata error:", err);
   }
 }
+
+function startWaveform() {
+  const bars = waveform.querySelectorAll('.bar');
+
+  // persistent smoothing memory
+  let smoothed = new Array(bars.length).fill(0);
+
+  // previous frame memory (for reactivity)
+  let prevSmoothed = new Array(bars.length).fill(0);
+
+  // persistent bass memory (for rhythm detection)
+  let lastBass = 0;
+
+  function draw() {
+    animationId = requestAnimationFrame(draw);
+
+    analyser.getByteFrequencyData(dataArray);
+
+    // perceptual scaling based on volume slider (0–1)
+    const vol = Math.max(0.15, audioPlayer.volume); // never fully dead
+    // iTunes-style perceptual scaling
+    const visualScale = 0.55 + Math.pow(vol, 0.6) * 0.6;
+
+    bars.forEach((bar, i) => {
+      // bias toward bass (lower bins move more)
+      const binIndex = i * 2 + 2;
+
+      // --- Spotify-style bass weighting ---
+      const bass = (dataArray[1] + dataArray[2] + dataArray[3]) / 3;
+      const mid = dataArray[binIndex] || 0;
+
+      // Winamp-style expressive bias (center bars move more)
+      const positionBias = 1 - Math.abs(i - bars.length / 2) / (bars.length / 2);
+      const expressiveBoost = 0.9 + positionBias * 0.2;
+
+      // transient emphasis (kick detection)
+      const bassDelta = Math.max(0, bass - lastBass);
+      lastBass = bass;
+
+      // boost only on sudden hits
+      const transientBoost =
+        bassDelta > 6
+          ? 1 + Math.min(bassDelta / 32, 0.8)
+          : 1;
+
+      const raw = (mid * 0.6 + bass * 0.4) * expressiveBoost * transientBoost;
+
+
+      // logarithmic compression (prevents “stuck at loud” look)
+      const compressed = Math.log10(1 + raw) * 32;
+
+      // apply volume scaling
+      const target = compressed * visualScale;
+
+      // --- AGC-lite normalization ---
+      const peakError = TARGET_PEAK / Math.max(target, 0.001);
+
+      // adapt gain slowly (prevents snapping)
+      if (peakError < visualGain) {
+        visualGain += (peakError - visualGain) * GAIN_ATTACK;
+      } else {
+        visualGain += (peakError - visualGain) * GAIN_RELEASE;
+      }
+
+      // apply adaptive gain
+      const normalized = target * visualGain;
+
+      // temporal smoothing (iTunes-like motion)
+      smoothed[i] = smoothed[i] * 0.75 + normalized * 0.25;
+
+      // frame-to-frame change (event reactivity)
+      const delta = Math.abs(smoothed[i] - prevSmoothed[i]);
+      prevSmoothed[i] = smoothed[i];
+
+      // ONLY boost when there is real change
+      const reactive = smoothed[i] + Math.min(delta * 2.4, 8);
+
+      // nonlinear height curve (adds drama without peaking)
+      const curved = Math.pow(reactive / 20, 0.75) * 20;
+      const height = Math.max(4, Math.min(20, curved));
+
+      // subtle phase drift for organic motion
+      const phase = Math.sin(performance.now() / 260 + i * 0.8) * 1.4;
+      bar.style.height = `${height}px`;
+
+    });
+  }
+
+  draw();
+}
+
+function stopWaveform() {
+  cancelAnimationFrame(animationId);
+
+  waveform.querySelectorAll('.bar').forEach(bar => {
+    bar.style.height = '4px';
+  });
+}
+
+// ----------------------------------------------
+// VISUAL GAIN CONTROL (AGC-lite)
+// ----------------------------------------------
+
+// slowly adapting visual gain so waveform never pegs
+let visualGain = 1.0;
+const GAIN_ATTACK = 0.015;   // reacts to loud audio
+const GAIN_RELEASE = 0.004;  // relaxes on quiet audio
+const TARGET_PEAK = 14;      // desired visual height in px
 
 
 // ----------------------------------------------

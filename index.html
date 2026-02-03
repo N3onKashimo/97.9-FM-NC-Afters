@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>97.9 FM NC Afters</title>
@@ -11,10 +12,13 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <!-- Dynamic blurred artwork background -->
   <div class="bg-art" id="bgArt"></div>
@@ -27,6 +31,7 @@
         <div class="toolbar-tabs">
           <button class="tab active" id="dateTab">Loading...</button>
           <button class="tab" id="timeTab">Loading...</button>
+          <button class="tab" id="themeToggle" aria-label="Toggle theme">☀️</button>
         </div>
         <div class="toolbar-spacer"></div>
         <div class="window-buttons">
@@ -46,8 +51,8 @@
                 <img src="pfp.png" alt="Profile" />
               </div>
               <div class="profile-meta">
-                <div class="meta-line strong">user: @pewpers • Online now</div>
-                <div class="meta-line">Status : Radio Hosting</div>
+                <div class="meta-line strong">user: @pewpers </div>
+                <div class="meta-line">Status • Online</div>
 
                 <!-- PATCH #1 — REMOVED NOTES FROM PROFILE CARD -->
               </div>
@@ -58,8 +63,8 @@
             <div class="links-title">Get to know your Host!</div>
             <div class="links-list">
               <a href="https://open.spotify.com/user/1254759797?si=ff040dad8c3b46a4" target="_blank">Spotify</a>
-              <a href="https://www.tumblr.com/iliketopewp" target="_blank">Tumblr</a>
               <a href="https://www.pinterest.com/N3onKashimo/" target="_blank">Pinterest</a>
+              <a href="https://forms.gle/2NDCFuDxX3BcwWM68" target="_blank">Feedback</a>
             </div>
           </div>
         </div>
@@ -82,6 +87,8 @@
 
             <div class="player-controls">
               <button id="playBtn" class="btn primary">▶ Play</button>
+              <button id="liveBtn" class="btn primary">⏩ Live</button>
+              <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
             </div>
 
             <!-- Waveform -->
@@ -105,43 +112,32 @@
 
               <div class="station-body" id="stationWheel">
 
-        <!-- 1. Top Scrobbles -->
-        <div class="station-row active"
-            data-stream="https://ncafters.live/tops"
-            data-title="Top Scrobbles Trending"
-            data-genre="Last.fm / Trending"
-            data-mount="/tops"
-            data-icecast="true">
-          <span class="col-index">1.</span>
-          <span class="col-title">Top Scrobbles Trending</span>
-          <span class="col-genre">Last.fm / Trending</span>
-        </div>
+                <!-- 1. Top Scrobbles -->
+                <div class="station-row active" data-stream="https://ncafters.live/tops"
+                  data-title="Top Scrobbles Trending" data-genre="Last.fm / Trending" data-mount="/tops"
+                  data-icecast="true">
+                  <span class="col-index">1.</span>
+                  <span class="col-title">Top Scrobbles Trending</span>
+                  <span class="col-genre">Last.fm / Trending</span>
+                </div>
 
-        <!-- 2. Hot Topic -->
-        <div class="station-row"
-            data-stream="https://ncafters.live/hottopic"
-            data-title="Hot Topic"
-            data-genre="Emo / Pop Punk"
-            data-mount="/hottopic"
-            data-icecast="true">
-          <span class="col-index">2.</span>
-          <span class="col-title">Hot Topic</span>
-          <span class="col-genre">Emo / Pop Punk</span>
-        </div>
+                <!-- 2. Hot Topic -->
+                <div class="station-row" data-stream="https://ncafters.live/hottopic" data-title="Hot Topic"
+                  data-genre="Emo / Pop Punk" data-mount="/hottopic" data-icecast="true">
+                  <span class="col-index">2.</span>
+                  <span class="col-title">Hot Topic</span>
+                  <span class="col-genre">Emo / Pop Punk</span>
+                </div>
 
-        <!-- 3. Miami Vice -->
-        <div class="station-row"
-            data-stream="https://ncafters.live/miamivice"
-            data-title="Miami Vice"
-            data-genre="Retro / 80s"
-            data-mount="/miamivice"
-            data-icecast="true">
-          <span class="col-index">3.</span>
-          <span class="col-title">Miami Vice</span>
-          <span class="col-genre">Retro / 80s</span>
-        </div>
+                <!-- 3. Miami Vice -->
+                <div class="station-row" data-stream="https://ncafters.live/miamivice" data-title="Miami Vice"
+                  data-genre="Retro / 80s" data-mount="/miamivice" data-icecast="true">
+                  <span class="col-index">3.</span>
+                  <span class="col-title">Miami Vice</span>
+                  <span class="col-genre">Retro / 80s</span>
+                </div>
 
-      
+
               </div>
             </div>
           </div>
@@ -206,4 +202,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>
