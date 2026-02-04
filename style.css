@@ -61,7 +61,8 @@ html.day-mode body {
 /* Dynamic blurred background */
 .bg-art {
   position: fixed;
-  inset: -60px;              /* OVERSCAN */
+  inset: -60px;
+  /* OVERSCAN */
   background-size: cover;
   background-position: center;
   opacity: 0.25;
@@ -74,7 +75,8 @@ html.day-mode body {
 .bg-art::before {
   content: "";
   position: absolute;
-  inset: -120px;             /* BIGGER OVERSCAN */
+  inset: -120px;
+  /* BIGGER OVERSCAN */
   background: inherit;
   filter: blur(36px) saturate(120%);
   transform: translateZ(0);
@@ -82,20 +84,16 @@ html.day-mode body {
 
 /* Seam mask — hides GPU blur boundaries */
 .bg-art {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
 }
 
 /* Day mode: keep album art but soften it heavily */
@@ -247,20 +245,6 @@ html.day-mode .tab.active {
   grid-template-columns: 1.35fr 1.05fr;
   gap: 10px;
   margin-bottom: 8px;
-}
-
-@media (max-width: 480px) {
-
-  .row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-
-  /* Reduce card padding slightly */
-  .card {
-    padding: 8px;
-  }
 }
 
 
@@ -429,10 +413,12 @@ html.day-mode .cover-frame {
 /* Cover + glow stack (vinyl removed) */
 .cover-inner {
   position: relative;
-  width: 220px;
-  height: 220px;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
   border-radius: 8px;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .cover-frame img {
@@ -669,18 +655,6 @@ html.day-mode .waveform .bar {
   color: #e2e2e2;
 }
 
-@media (max-width: 480px) {
-
-  .station-header,
-  .station-row {
-    grid-template-columns: 24px 1fr 80px;
-  }
-
-  .station-body {
-    max-height: 140px;
-  }
-}
-
 
 /* Day mode: Station header readability (iTunes-style) */
 html.day-mode .station-header {
@@ -858,21 +832,120 @@ html.day-mode .post-body {
   margin-top: 4px;
 }
 
-@media (max-width: 480px) {
+/* ============================
+   MOBILE (≤ 430px) — TRUE 2 COLUMN
+   ============================ */
+@media (max-width: 430px) {
 
-  /* Reduce album art height on mobile */
-  .cover-frame img {
-    max-width: 100%;
-    height: 180px;
+  /* Center player card on mobile */
+  .player-card {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 320px;
+    width: 100%;
   }
 
-  /* Tighten cover container spacing */
-  .cover-frame {
+  /* MOBILE: align links card to the left */
+  .links-card {
+    align-self: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+
+  /* MOBILE: center playback controls */
+  .player-controls,
+  .player-buttons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+
+  .player-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* MOBILE: center container, readable text */
+  .player-card .track-info {
+    text-align: center;
+    max-width: 90%;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .desktop-bg {
     padding: 6px;
   }
 
-  /* Reduce vertical gaps in player */
+  .content {
+    padding: 6px;
+  }
+
+  /* Center player card on mobile */
   .player-card {
-    gap: 6px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 320px;
+    width: 100%;
+  }
+
+  .player-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 1 column layout */
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .card {
+    padding: 8px;
+  }
+
+  /* Hide right-side cards */
+  .posts-card,
+  .meta-card,
+  .live-metadata,
+  .now-playing {
+    display: none !important;
+  }
+
+  /* Re-enable track history */
+  .posts-card.track-history {
+    display: block !important;
+    order: 3;
+  }
+
+  /* Smaller album art */
+  .cover-inner {
+    max-width: 140px;
+  }
+
+  .player-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #volumeSlider {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .station-body {
+    max-height: 120px;
+  }
+
+  .station-header,
+  .station-row {
+    grid-template-columns: 22px 1fr 70px;
+    font-size: 10px;
   }
 }
