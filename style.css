@@ -249,6 +249,21 @@ html.day-mode .tab.active {
   margin-bottom: 8px;
 }
 
+@media (max-width: 480px) {
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  /* Reduce card padding slightly */
+  .card {
+    padding: 8px;
+  }
+}
+
+
 /* Cards */
 .card {
   background: #232323;
@@ -654,6 +669,19 @@ html.day-mode .waveform .bar {
   color: #e2e2e2;
 }
 
+@media (max-width: 480px) {
+
+  .station-header,
+  .station-row {
+    grid-template-columns: 24px 1fr 80px;
+  }
+
+  .station-body {
+    max-height: 140px;
+  }
+}
+
+
 /* Day mode: Station header readability (iTunes-style) */
 html.day-mode .station-header {
   color: #444;
@@ -828,4 +856,23 @@ html.day-mode .post-body {
   font-size: 10px;
   color: #b5b5b5;
   margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+
+  /* Reduce album art height on mobile */
+  .cover-frame img {
+    max-width: 100%;
+    height: 180px;
+  }
+
+  /* Tighten cover container spacing */
+  .cover-frame {
+    padding: 6px;
+  }
+
+  /* Reduce vertical gaps in player */
+  .player-card {
+    gap: 6px;
+  }
 }
