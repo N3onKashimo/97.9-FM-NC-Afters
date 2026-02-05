@@ -540,23 +540,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------
-  // MOBILE: COLLAPSIBLE LIVE METADATA
+  // COLLAPSIBLE LIVE METADATA (desktop + mobile)
   // ----------------------------------------------
-  const isMobile = window.matchMedia("(max-width: 430px)").matches;
+  const metaCard = document.querySelector(".posts-card.collapsible");
+  const header = metaCard?.querySelector(".collapsible-header");
 
-  if (isMobile) {
-    const metaCard = document.querySelector(".posts-card.collapsible");
-    const header = metaCard?.querySelector(".collapsible-header");
+  if (metaCard && header) {
+    // Start collapsed ONLY on mobile
+    const isMobile = window.matchMedia("(max-width: 430px)").matches;
+    if (isMobile) metaCard.classList.add("collapsed");
 
-    if (metaCard && header) {
-      // Start collapsed on mobile
-      metaCard.classList.add("collapsed");
-
-      header.addEventListener("click", () => {
-        metaCard.classList.toggle("collapsed");
-      });
-    }
+    // Click to toggle on ALL screen sizes
+    header.addEventListener("click", () => {
+      metaCard.classList.toggle("collapsed");
+    });
   }
+
 
 });
 
