@@ -540,23 +540,32 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ----------------------------------------------
-  // COLLAPSIBLE LIVE METADATA (desktop + mobile)
+  // COLLAPSIBLE LIVE METADATA (DESKTOP + MOBILE)
   // ----------------------------------------------
   const metaCard = document.querySelector(".posts-card.collapsible");
   const header = metaCard?.querySelector(".collapsible-header");
 
   if (metaCard && header) {
-    // Start collapsed ONLY on mobile
-    const isMobile = window.matchMedia("(max-width: 430px)").matches;
-    if (isMobile) metaCard.classList.add("collapsed");
+    const mobileMQ = window.matchMedia("(max-width: 430px)");
 
-    // Click to toggle on ALL screen sizes
-    header.addEventListener("click", () => {
-      metaCard.classList.toggle("collapsed");
+    // Start collapsed ONLY on mobile (but keep click working everywhere)
+    if (mobileMQ.matches) metaCard.classList.add("collapsed");
+
+    const toggleMeta = () => metaCard.classList.toggle("collapsed");
+
+    // Click support (desktop + mobile)
+    header.addEventListener("click", toggleMeta);
+
+    // Keyboard support (nice-to-have)
+    header.setAttribute("role", "button");
+    header.setAttribute("tabindex", "0");
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleMeta();
+      }
     });
   }
-
-
 });
 
 
