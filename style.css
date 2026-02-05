@@ -4,7 +4,9 @@
   --art-url: url("cover.png");
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -454,9 +456,32 @@ html.day-mode .cover-frame {
   font-weight: 600;
 }
 
+.track-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  /* max 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .track-artist {
   color: #bcbcbc;
+
+  /* layout safety */
+  max-width: 100%;
+  text-align: center;
+
+  /* clamp behavior */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  /* ONE line only */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
+
 
 /* Text hierarchy — iTunes style */
 html.day-mode {
@@ -545,8 +570,14 @@ body:not(.day-mode) .btn.primary {
   cursor: pointer;
 
   margin-top: 10px;
-  /* 👈 ADD THIS */
+
 }
+
+/* iOS: volume control is hardware-only */
+#volumeSlider.ios-hidden {
+  display: none;
+}
+
 
 /* Track */
 #volumeSlider::-webkit-slider-runnable-track {
@@ -682,6 +713,16 @@ html.day-mode .station-header {
   border-radius: 3px;
 }
 
+/* Day mode scrollbar */
+html.day-mode .station-body::-webkit-scrollbar-track {
+  background: #e6e6e6;
+}
+
+html.day-mode .station-body::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+}
+
+
 .station-row {
   display: grid;
   grid-template-columns: 30px 1fr 110px;
@@ -696,9 +737,22 @@ html.day-mode .station-header {
 }
 
 .station-row.active {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0));
-  box-shadow: inset 2px 0 0 var(--accent);
+  background: linear-gradient(to right,
+      rgba(255, 255, 255, 0.12),
+      rgba(0, 0, 0, 0));
+  box-shadow:
+    inset 4px 0 0 var(--accent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
+
+html.day-mode .station-row.active {
+  background: #e6e6e6;
+  box-shadow:
+    inset 4px 0 0 #0a84ff,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+
 
 .col-index {
   text-align: left;
@@ -785,7 +839,51 @@ html.day-mode .post-body {
 }
 
 .activity-track {
+  position: relative;
+  width: 45%;
+  /* FIXED geometry */
+  overflow: hidden;
+  white-space: nowrap;
   font-weight: 500;
+  flex: 0 0 45%;
+  /* prevents flex reflow */
+}
+
+
+.activity-text {
+  flex: 0 0 auto;
+}
+
+.activity-progress {
+  flex: 0 0 auto;
+}
+
+
+
+/* Activity marquee — stable, real loop */
+.activity-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Moving strip */
+.activity-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+
+  animation: activity-scroll 14s linear infinite;
+}
+
+/* True right → left wrap */
+@keyframes activity-scroll {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
 }
 
 .activity-progress {
@@ -832,34 +930,94 @@ html.day-mode .post-body {
   margin-top: 4px;
 }
 
-/* ============================
-   MOBILE (≤ 430px) — TRUE 2 COLUMN
-   ============================ */
 @media (max-width: 430px) {
 
-  /* Center player card on mobile */
-  .player-card {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 320px;
+  /* 1-column layout, no centering tricks */
+  .main-grid,
+  .left-column,
+  .right-column,
+  .player-card,
+  .posts-card,
+  .activity-bar {
     width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 
-  /* MOBILE: align links card to the left */
-  .links-card {
-    align-self: flex-start;
-    text-align: left;
-    width: 100%;
+}
+
+
+/* ============================
+   Mobile collapsible metadata
+   ============================ */
+
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.28s ease, opacity 0.2s ease;
+}
+
+.collapsible.collapsed .collapsible-content {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.collapsible:not(.collapsed) .collapsible-content {
+  max-height: none;
+}
+
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.collapse-indicator {
+  font-size: 12px;
+  opacity: 0.6;
+  transition: transform 0.25s ease;
+}
+
+.collapsible.collapsed .collapse-indicator {
+  transform: rotate(-90deg);
+}
+
+/* MOBILE: left-align host links */
+.links-title,
+.links-list {
+  text-align: left;
+}
+
+/* MOBILE: align links card to the left */
+.links-card {
+  align-self: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+/* MOBILE: center playback controls */
+.player-controls,
+.player-buttons {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 430px) {
+
+  /* MOBILE: tighter title + artist centering */
+  .track-title {
+    -webkit-line-clamp: 2;
+    text-align: center;
   }
 
-  /* MOBILE: center playback controls */
-  .player-controls,
-  .player-buttons {
-    display: flex;
-    justify-content: center;
-    width: 100%;
+  .track-artist {
+    font-size: 11px;
+    opacity: 0.85;
   }
-
 
   .player-card .card-body {
     display: flex;
@@ -886,13 +1044,12 @@ html.day-mode .post-body {
     padding: 6px;
   }
 
-  /* Center player card on mobile */
-  .player-card {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 320px;
-    width: 100%;
-  }
+.player-card {
+  width: 100%;
+  max-width: min(100%, 360px);
+  margin-inline: auto;
+}
+
 
   .player-card .card-body {
     display: flex;
@@ -910,13 +1067,6 @@ html.day-mode .post-body {
     padding: 8px;
   }
 
-  /* Hide right-side cards */
-  .posts-card,
-  .meta-card,
-  .live-metadata,
-  .now-playing {
-    display: none !important;
-  }
 
   /* Re-enable track history */
   .posts-card.track-history {
@@ -924,10 +1074,6 @@ html.day-mode .post-body {
     order: 3;
   }
 
-  /* Smaller album art */
-  .cover-inner {
-    max-width: 140px;
-  }
 
   .player-controls {
     flex-direction: column;
