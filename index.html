@@ -91,17 +91,6 @@
               <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume" />
             </div>
 
-            <!-- Waveform -->
-            <div class="waveform" id="waveform">
-              <span class="bar"></span>
-              <span class="bar"></span>
-              <span class="bar"></span>
-              <span class="bar"></span>
-              <span class="bar"></span>
-              <span class="bar"></span>
-              <span class="bar"></span>
-            </div>
-
             <!-- Multi-station wheel -->
             <div class="station-table">
               <div class="station-header">
@@ -111,7 +100,7 @@
               </div>
 
               <div class="station-body" id="stationWheel">
-                
+
                 <!-- 1. Pewpers Top Songs 2025 -->
                 <div class="station-row active" data-stream="https://ncafters.live/topsongs2025"
                   data-title="Pewpers Top Songs 2025" data-genre="Charts / 2025" data-mount="/topsongs2025"
@@ -182,64 +171,78 @@
           </div>
 
           <!-- Metadata & posts -->
-          <div class="card posts-card glass">
+          <div class="card posts-card glass collapsible">
+
+            <!-- Header (tap target) -->
             <div class="post meta-post">
-              <div class="post-title strong">Live Metadata</div>
-              <div class="meta-grid">
-                <div class="meta-label">Mount:</div>
-                <div class="meta-value" id="metaMount">—</div>
-
-                <div class="meta-label">Listeners:</div>
-                <div class="meta-value" id="metaListeners">0</div>
-
-                <div class="meta-label">Peak:</div>
-                <div class="meta-value" id="metaPeak">0</div>
-
-                <div class="meta-label">Bitrate:</div>
-                <div class="meta-value" id="metaBitrate">—</div>
-
-                <div class="meta-label">Uptime:</div>
-                <div class="meta-value" id="metaUptime">—</div>
+              <div class="post-title strong collapsible-header">
+                Live Metadata
+                <span class="collapse-indicator">▾</span>
               </div>
             </div>
 
-            <div class="post">
-              <div class="post-title strong">Now Playing</div>
-              <div class="post-body" id="serverStatus">Connecting to Icecast…</div>
-            </div>
+            <!-- EVERYTHING BELOW collapses together -->
+            <div class="collapsible-content">
 
-            <!-- PATCH #2 — REPLACED NOTES WITH TRACK HISTORY -->
-            <div class="post">
-              <div class="post-title strong">Track History</div>
-              <div class="post-body" id="trackHistoryList">
-                No tracks played yet…
+              <!-- Live Metadata content -->
+              <div class="post">
+                <div class="meta-grid">
+                  <div class="meta-label">Mount:</div>
+                  <div class="meta-value" id="metaMount">—</div>
+                  <div class="meta-label">Listeners:</div>
+                  <div class="meta-value" id="metaListeners">0</div>
+                  <div class="meta-label">Peak:</div>
+                  <div class="meta-value" id="metaPeak">0</div>
+                  <div class="meta-label">Bitrate:</div>
+                  <div class="meta-value" id="metaBitrate">—</div>
+                  <div class="meta-label">Uptime:</div>
+                  <div class="meta-value" id="metaUptime">—</div>
+                </div>
               </div>
-            </div>
 
+              <!-- Now Playing -->
+              <div class="post">
+                <div class="post-title strong">Now Playing</div>
+                <div class="post-body" id="serverStatus">
+                  Connecting to Icecast…
+                </div>
+              </div>
+
+              <!-- Track History -->
+              <div class="post">
+                <div class="post-title strong">Track History</div>
+                <div class="post-body" id="trackHistoryList">
+                  No tracks played yet…
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Activity bar -->
+          <div class="activity-bar glass">
+            <span class="activity-text">Activity: Listening to</span>
+            <span class="activity-track" id="activityTrack">
+              <span class="activity-marquee">— starting radio…</span>
+            </span>
+            <div class="activity-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+              </div>
+              <span class="activity-time" id="activityTime">LIVE</span>
+            </div>
+          </div>
+
+
+          <div class="footer">
           </div>
         </div>
 
-        <!-- Activity bar -->
-        <div class="activity-bar glass">
-          <span class="activity-text">Activity: Listening to</span>
-          <span class="activity-track" id="activityTrack">— starting radio…</span>
-          <div class="activity-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <span class="activity-time" id="activityTime">LIVE</span>
-          </div>
-        </div>
-
-        <div class="footer">
-        </div>
+        <audio id="audioPlayer"></audio>
       </div>
-
-      <audio id="audioPlayer"></audio>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

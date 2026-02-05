@@ -4,9 +4,12 @@
   --art-url: url("cover.png");
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
+
 
 /* iTunes-style Day Mode */
 body.day-mode {
@@ -42,7 +45,7 @@ body.day-mode h3 {
 }
 
 body.day-mode .muted,
-body.day-mo body,
+body.day-mode body,
 html {
   margin: 0;
   padding: 0;
@@ -61,7 +64,8 @@ html.day-mode body {
 /* Dynamic blurred background */
 .bg-art {
   position: fixed;
-  inset: -60px;              /* OVERSCAN */
+  inset: -60px;
+  /* OVERSCAN */
   background-size: cover;
   background-position: center;
   opacity: 0.25;
@@ -74,7 +78,8 @@ html.day-mode body {
 .bg-art::before {
   content: "";
   position: absolute;
-  inset: -120px;             /* BIGGER OVERSCAN */
+  inset: -120px;
+  /* BIGGER OVERSCAN */
   background: inherit;
   filter: blur(36px) saturate(120%);
   transform: translateZ(0);
@@ -82,20 +87,16 @@ html.day-mode body {
 
 /* Seam mask — hides GPU blur boundaries */
 .bg-art {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 15%,
-    black 85%,
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%);
 }
 
 /* Day mode: keep album art but soften it heavily */
@@ -247,20 +248,6 @@ html.day-mode .tab.active {
   grid-template-columns: 1.35fr 1.05fr;
   gap: 10px;
   margin-bottom: 8px;
-}
-
-@media (max-width: 480px) {
-
-  .row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-
-  /* Reduce card padding slightly */
-  .card {
-    padding: 8px;
-  }
 }
 
 
@@ -429,10 +416,12 @@ html.day-mode .cover-frame {
 /* Cover + glow stack (vinyl removed) */
 .cover-inner {
   position: relative;
-  width: 220px;
-  height: 220px;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
   border-radius: 8px;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .cover-frame img {
@@ -461,16 +450,39 @@ html.day-mode .cover-frame {
 
 .cover-caption {
   font-size: 11px;
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 .track-title {
   font-weight: 600;
 }
 
+.track-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .track-artist {
   color: #bcbcbc;
+
+  /* layout safety */
+  max-width: 100%;
+  text-align: left;
+
+  /* clamp behavior */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
+
 
 /* Text hierarchy — iTunes style */
 html.day-mode {
@@ -559,8 +571,14 @@ body:not(.day-mode) .btn.primary {
   cursor: pointer;
 
   margin-top: 10px;
-  /* 👈 ADD THIS */
+
 }
+
+/* iOS: volume control is hardware-only */
+#volumeSlider.ios-hidden {
+  display: none;
+}
+
 
 /* Track */
 #volumeSlider::-webkit-slider-runnable-track {
@@ -669,18 +687,6 @@ html.day-mode .waveform .bar {
   color: #e2e2e2;
 }
 
-@media (max-width: 480px) {
-
-  .station-header,
-  .station-row {
-    grid-template-columns: 24px 1fr 80px;
-  }
-
-  .station-body {
-    max-height: 140px;
-  }
-}
-
 
 /* Day mode: Station header readability (iTunes-style) */
 html.day-mode .station-header {
@@ -708,6 +714,16 @@ html.day-mode .station-header {
   border-radius: 3px;
 }
 
+/* Day mode scrollbar */
+html.day-mode .station-body::-webkit-scrollbar-track {
+  background: #e6e6e6;
+}
+
+html.day-mode .station-body::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+}
+
+
 .station-row {
   display: grid;
   grid-template-columns: 30px 1fr 110px;
@@ -722,9 +738,22 @@ html.day-mode .station-header {
 }
 
 .station-row.active {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0));
-  box-shadow: inset 2px 0 0 var(--accent);
+  background: linear-gradient(to right,
+      rgba(255, 255, 255, 0.12),
+      rgba(0, 0, 0, 0));
+  box-shadow:
+    inset 4px 0 0 var(--accent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
+
+html.day-mode .station-row.active {
+  background: #e6e6e6;
+  box-shadow:
+    inset 4px 0 0 #0a84ff,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+
 
 .col-index {
   text-align: left;
@@ -812,6 +841,46 @@ html.day-mode .post-body {
 
 .activity-track {
   font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
+  /* CRITICAL: allows shrinking inside flex */
+  overflow: hidden;
+}
+
+.activity-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+.activity-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+/* Only animate if JS decides it's overflowing */
+.activity-marquee.is-overflowing {
+  animation: activity-scroll 14s linear infinite;
+}
+
+/* True RIGHT -> LEFT */
+@keyframes activity-scroll {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+
+.activity-text {
+  flex: 0 0 auto;
+}
+
+.activity-progress {
+  flex: 0 0 auto;
 }
 
 .activity-progress {
@@ -858,21 +927,331 @@ html.day-mode .post-body {
   margin-top: 4px;
 }
 
-@media (max-width: 480px) {
+/* Desktop defaults */
+.player-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 
-  /* Reduce album art height on mobile */
-  .cover-frame img {
-    max-width: 100%;
-    height: 180px;
+.station-body {
+  max-height: 140px;
+}
+
+
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.28s ease, opacity 0.2s ease;
+}
+
+.collapsible.collapsed .collapsible-content {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.collapsible:not(.collapsed) .collapsible-content {
+  max-height: 999px;
+  /* keeps transition + still effectively "open" */
+  opacity: 1;
+}
+
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.collapse-indicator {
+  font-size: 12px;
+  opacity: 0.6;
+  transition: transform 0.25s ease;
+}
+
+.collapsible.collapsed .collapse-indicator {
+  transform: rotate(-90deg);
+}
+
+
+/* MOBILE: left-align host links */
+.links-title,
+.links-list {
+  text-align: left;
+}
+
+/* MOBILE: align links card to the left */
+.links-card {
+  align-self: flex-start;
+  text-align: left;
+  width: 100%;
+}
+
+/* MOBILE: center container, readable text */
+.player-card .track-info {
+  text-align: center;
+  max-width: 90%;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+.player-card .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+
+.card {
+  padding: 8px;
+}
+
+
+/* Re-enable track history */
+.posts-card.track-history {
+  display: block !important;
+  order: 3;
+}
+
+.mid-row .activity-bar {
+  grid-column: 1 / -1;
+  /* span both columns */
+  width: 100%;
+}
+
+
+@media (max-width: 430px) {
+
+  /* --- MOBILE WIDTH SAFETY RAILS (prevents horizontal overflow) --- */
+  .bg-art {
+    inset: 0;
   }
 
-  /* Tighten cover container spacing */
-  .cover-frame {
+  .bg-art::before {
+    inset: -60px;
+  }
+
+  /* keep blur overscan but smaller on mobile */
+
+  .desktop-bg {
     padding: 6px;
   }
 
-  /* Reduce vertical gaps in player */
-  .player-card {
+  .content {
+    padding: 6px;
+  }
+
+  /* 1-column */
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* CRITICAL: allow grid children to shrink instead of forcing overflow */
+  .row>* {
+    min-width: 0;
+  }
+
+  .player-card,
+  .posts-card,
+  .activity-bar {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+
+  /* MOBILE: make the cover area a single flat color (no gray mat) */
+  .cover-frame {
+    background: transparent !important;
+  }
+
+  /* MOBILE: the inset padding area should be the SAME color as the card */
+  .cover-inner {
+    background: #232323 !important;
+    /* matches .card background */
+    padding: 12px;
+  }
+
+  html.day-mode .cover-inner {
+    background: #ffffff !important;
+    /* matches day-mode card */
+  }
+
+
+  /* If the image has transparency, ensure nothing shows behind it */
+  .cover-frame img {
+    background: transparent;
+  }
+
+  /* --- MOBILE ALBUM ART: inset image, NO gray mat (dark + day mode) --- */
+  .cover-frame,
+  html.day-mode .cover-frame,
+  body.day-mode .cover-frame {
+    background: transparent !important;
+    /* kills the #141414 / #f6f6f6 mat */
+    border: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .cover-inner {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+
+    /* creates the space between edge and image */
+    padding: 12px;
+
+    /* IMPORTANT: this area must also not be tinted */
+    background: transparent !important;
+
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: none !important;
+  }
+
+  .cover-frame img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+
+    border-radius: 10px;
+    background: transparent;
+
+    max-height: 360px;
+  }
+
+
+  /* MOBILE: glow causes the gray “mat” in the inset padding — disable it */
+  .cover-glow {
+    display: none !important;
+  }
+
+
+
+
+  /* --- PLAYER CONTROLS: slider goes UNDER buttons (no giant pill) --- */
+  .player-controls {
+    display: flex;
+    flex-wrap: wrap;
     gap: 6px;
+    align-items: center;
+  }
+
+  .player-controls .btn {
+    flex: 0 0 auto;
+    /* buttons never stretch */
+  }
+
+  #volumeSlider {
+    flex: 1 0 100%;
+    /* forces a new line under buttons */
+    width: 100%;
+    max-width: 100%;
+    margin: 8px 0 0;
+    /* spacing under buttons */
+  }
+
+  /* --- MOBILE: left-align track text (override global centering) --- */
+  .player-card .card-body {
+    align-items: stretch;
+    /* stop centering the entire column */
+  }
+
+  .player-card .track-info {
+    text-align: left;
+    /* override global .track-info centering */
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .track-title,
+  .track-artist {
+    text-align: left;
+    /* override any mobile/desktop centering */
+  }
+
+  /* MOBILE: left align title/artist + add a little inset padding */
+  .cover-caption {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .track-title,
+  .track-artist {
+    text-align: left;
+  }
+
+
+  /* --- STATION LIST: lock width + ellipsis long text + ONLY vertical scroll --- */
+  .station-header,
+  .station-row {
+    grid-template-columns: 22px 1fr 92px;
+    /* give Genre more room */
+    font-size: 10px;
+  }
+
+  /* Title can ellipsis safely */
+  .col-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .station-table,
+  .station-body {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .station-body {
+    max-height: 140px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* IMPORTANT: stop sideways spill */
+    padding-right: 2px;
+  }
+
+
+  /* Genre should wrap on mobile (no truncation) */
+  .col-genre {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.15;
+    text-align: right;
+  }
+
+  /* --- COLLAPSIBLE HEADERS: prevent long text from widening cards --- */
+  .post-title.collapsible-header {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .post-title {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Links card mobile alignment */
+  .links-title,
+  .links-list {
+    text-align: left;
+  }
+
+  .links-card {
+    align-self: flex-start;
+    text-align: left;
+    width: 100%;
   }
 }

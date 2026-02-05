@@ -7,6 +7,17 @@ const audioPlayer = document.getElementById('audioPlayer');
 audioPlayer.crossOrigin = "anonymous";
 const playBtn = document.getElementById('playBtn');
 const volumeSlider = document.getElementById('volumeSlider');
+
+// ----------------------------------------------
+// iOS VOLUME LIMITATION HANDLING
+// ----------------------------------------------
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+if (isIOS && volumeSlider) {
+  volumeSlider.disabled = true;
+  volumeSlider.classList.add('ios-hidden');
+}
+
 const stationRows = document.querySelectorAll('.station-row');
 
 const nowTitle = document.getElementById('nowTitle');
@@ -71,7 +82,7 @@ setInterval(updateDateTime, 1000);
 function setPlayingVisual(isPlaying) {
   if (isPlaying) {
     document.body.classList.add('is-playing');
-    waveform.classList.add('active');
+    if (waveform) waveform.classList.add('active');
     playBtn.textContent = '⏸ Pause';
 
     initAudioAnalyser();
@@ -79,7 +90,7 @@ function setPlayingVisual(isPlaying) {
     startWaveform();
   } else {
     document.body.classList.remove('is-playing');
-    waveform.classList.remove('active');
+    if (waveform) waveform.classList.remove('active');
     playBtn.textContent = '▶ Play';
 
     stopWaveform();
@@ -88,7 +99,7 @@ function setPlayingVisual(isPlaying) {
 
 function setActiveRow(row) {
   stationRows.forEach(r => r.classList.remove('active'));
-  if (row) row.classList.add('active');
+  if (row && row.classList) row.classList.add('active');
 }
 
 // ----------------------------------------------
@@ -119,21 +130,27 @@ function initAudioAnalyser() {
 
 
 // ----------------------------------------------
-// DAY / NIGHT MODE
+// DAY / NIGHT MODE (PERSISTED)
 // ----------------------------------------------
 const themeToggle = document.getElementById('themeToggle');
 
+// Load saved theme on boot
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "day") {
+  document.documentElement.classList.add("day-mode");
+  document.body.classList.add("day-mode");
+  themeToggle.textContent = "🌙";
+}
+
 themeToggle.addEventListener('click', () => {
-  const root = document.documentElement; // <html>
+  const root = document.documentElement;
   const isDay = root.classList.toggle('day-mode');
 
-  // keep body in sync too (so any body.day-mode rules still work)
   document.body.classList.toggle('day-mode', isDay);
-
-  // show the opposite icon (what you’ll switch TO)
   themeToggle.textContent = isDay ? '🌙' : '☀️';
-});
 
+  localStorage.setItem("theme", isDay ? "day" : "night");
+});
 
 // ----------------------------------------------
 // CLICK STATION (PATCHED - NO DUPLICATES)
@@ -173,11 +190,11 @@ playBtn.addEventListener('click', () => {
   if (!currentStream) return;
 
   if (audioPlayer.paused) {
-    audioPlayer.play().then(() => setPlayingVisual(true));
+    audioPlayer.play();
   } else {
     audioPlayer.pause();
-    setPlayingVisual(false);
   }
+
 });
 
 audioPlayer.addEventListener('play', () => setPlayingVisual(true));
@@ -223,6 +240,13 @@ function parseNowPlaying(str) {
     artist: artist.trim(),
     track: rest.join(' - ').trim()
   };
+}
+
+function decodeHTML(str) {
+  if (!str || typeof str !== "string") return str;
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
 }
 
 
@@ -335,16 +359,26 @@ async function fetchIcecast() {
     );
     if (!mount) return;
 
-    const rawSong = mount.title || "Unknown Track";
+    const rawSong = decodeHTML(mount.title || "Unknown Track");
 
     const { artist, track } = parseNowPlaying(rawSong);
 
     nowTitle.textContent = track || rawSong;
     nowArtist.textContent = artist || "Unknown Artist";
 
-    activityTrack.textContent = `— ${artist ? artist + " — " : ""}${track}`;
+    const activityText = `— ${artist ? artist + " — " : ""}${track}`;
+
+    // Write into inner marquee span if it exists (prevents layout + animation from breaking)
+    const marqueeEl = activityTrack?.querySelector?.(".activity-marquee");
+    if (marqueeEl) {
+      marqueeEl.textContent = activityText;
+    } else {
+      activityTrack.textContent = activityText;
+    }
+
 
     serverStatus.textContent = rawSong;
+
 
     metaMount.textContent = currentMount || "—";
     metaListeners.textContent = mount.listeners ?? 0;
@@ -373,6 +407,8 @@ async function fetchIcecast() {
 }
 
 function startWaveform() {
+  if (!waveform) return;
+
   const bars = waveform.querySelectorAll('.bar');
 
   // persistent smoothing memory
@@ -502,4 +538,26 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchIcecast();
     renderTrackHistory();
   }
+
+  // ----------------------------------------------
+  // MOBILE: COLLAPSIBLE LIVE METADATA
+  // ----------------------------------------------
+  const isMobile = window.matchMedia("(max-width: 430px)").matches;
+
+  if (isMobile) {
+    const metaCard = document.querySelector(".posts-card.collapsible");
+    const header = metaCard?.querySelector(".collapsible-header");
+
+    if (metaCard && header) {
+      // Start collapsed on mobile
+      metaCard.classList.add("collapsed");
+
+      header.addEventListener("click", () => {
+        metaCard.classList.toggle("collapsed");
+      });
+    }
+  }
+
 });
+
+
