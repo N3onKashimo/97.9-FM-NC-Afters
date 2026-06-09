@@ -460,7 +460,11 @@ html.day-mode .cover-frame {
 .track-title {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+<<<<<<< HEAD
   line-clamp: 2;
+=======
+  /* max 2 lines */
+>>>>>>> dev
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -471,12 +475,20 @@ html.day-mode .cover-frame {
 
   /* layout safety */
   max-width: 100%;
+<<<<<<< HEAD
   text-align: left;
+=======
+  text-align: center;
+>>>>>>> dev
 
   /* clamp behavior */
   display: -webkit-box;
   -webkit-line-clamp: 1;
+<<<<<<< HEAD
   line-clamp: 1;
+=======
+  /* ONE line only */
+>>>>>>> dev
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -840,7 +852,13 @@ html.day-mode .post-body {
 }
 
 .activity-track {
+  position: relative;
+  width: 45%;
+  /* FIXED geometry */
+  overflow: hidden;
+  white-space: nowrap;
   font-weight: 500;
+<<<<<<< HEAD
   flex: 1 1 auto;
   min-width: 0;
   /* CRITICAL: allows shrinking inside flex */
@@ -872,6 +890,10 @@ html.day-mode .post-body {
   to {
     transform: translateX(-100%);
   }
+=======
+  flex: 0 0 45%;
+  /* prevents flex reflow */
+>>>>>>> dev
 }
 
 
@@ -881,6 +903,37 @@ html.day-mode .post-body {
 
 .activity-progress {
   flex: 0 0 auto;
+<<<<<<< HEAD
+=======
+}
+
+
+
+/* Activity marquee — stable, real loop */
+.activity-viewport {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Moving strip */
+.activity-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+
+  animation: activity-scroll 14s linear infinite;
+}
+
+/* True right → left wrap */
+@keyframes activity-scroll {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+>>>>>>> dev
 }
 
 .activity-progress {
@@ -927,6 +980,7 @@ html.day-mode .post-body {
   margin-top: 4px;
 }
 
+<<<<<<< HEAD
 /* Desktop defaults */
 .player-controls {
   display: flex;
@@ -938,6 +992,29 @@ html.day-mode .post-body {
   max-height: 140px;
 }
 
+=======
+@media (max-width: 430px) {
+
+  /* 1-column layout, no centering tricks */
+  .main-grid,
+  .left-column,
+  .right-column,
+  .player-card,
+  .posts-card,
+  .activity-bar {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+}
+
+
+/* ============================
+   Mobile collapsible metadata
+   ============================ */
+>>>>>>> dev
 
 .collapsible-content {
   overflow: hidden;
@@ -951,9 +1028,13 @@ html.day-mode .post-body {
 }
 
 .collapsible:not(.collapsed) .collapsible-content {
+<<<<<<< HEAD
   max-height: 999px;
   /* keeps transition + still effectively "open" */
   opacity: 1;
+=======
+  max-height: none;
+>>>>>>> dev
 }
 
 
@@ -974,7 +1055,10 @@ html.day-mode .post-body {
   transform: rotate(-90deg);
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 /* MOBILE: left-align host links */
 .links-title,
 .links-list {
@@ -988,6 +1072,7 @@ html.day-mode .post-body {
   width: 100%;
 }
 
+<<<<<<< HEAD
 /* MOBILE: center container, readable text */
 .player-card .track-info {
   text-align: center;
@@ -1035,6 +1120,45 @@ body {
   }
 
   /* keep blur overscan but smaller on mobile */
+=======
+/* MOBILE: center playback controls */
+.player-controls,
+.player-buttons {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 430px) {
+
+  /* MOBILE: tighter title + artist centering */
+  .track-title {
+    -webkit-line-clamp: 2;
+    text-align: center;
+  }
+
+  .track-artist {
+    font-size: 11px;
+    opacity: 0.85;
+  }
+
+  .player-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* MOBILE: center container, readable text */
+  .player-card .track-info {
+    text-align: center;
+    max-width: 90%;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+>>>>>>> dev
 
   .desktop-bg {
     padding: 6px;
@@ -1044,12 +1168,30 @@ body {
     padding: 6px;
   }
 
+<<<<<<< HEAD
   /* 1-column */
+=======
+.player-card {
+  width: 100%;
+  max-width: min(100%, 360px);
+  margin-inline: auto;
+}
+
+
+  .player-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 1 column layout */
+>>>>>>> dev
   .row {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 
+<<<<<<< HEAD
   /* CRITICAL: allow grid children to shrink instead of forcing overflow */
   .row>* {
     min-width: 0;
@@ -1254,4 +1396,37 @@ body {
     text-align: left;
     width: 100%;
   }
+=======
+  .card {
+    padding: 8px;
+  }
+
+
+  /* Re-enable track history */
+  .posts-card.track-history {
+    display: block !important;
+    order: 3;
+  }
+
+
+  .player-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #volumeSlider {
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .station-body {
+    max-height: 120px;
+  }
+
+  .station-header,
+  .station-row {
+    grid-template-columns: 22px 1fr 70px;
+    font-size: 10px;
+  }
+>>>>>>> dev
 }
